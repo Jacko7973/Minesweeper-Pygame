@@ -7,7 +7,7 @@ import pygame
 from pygame.locals import *
 
 size = (30, 40)
-bombs = 200
+bombs = 150
 
 class Minesweeper(object):
 
@@ -23,6 +23,8 @@ class Minesweeper(object):
         self.clock = pygame.time.Clock()
         self.canvas = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Minesweeper')
+        icon_surface = pygame.image.load('Images/minesweeper-bomb.png')
+        pygame.display.set_icon(icon_surface)
         
         self.textFont = pygame.font.SysFont('Arial', 15, 1)
         self.infoTextFont = pygame.font.SysFont('Arial', 40, 1)
