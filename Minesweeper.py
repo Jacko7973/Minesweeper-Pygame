@@ -6,8 +6,10 @@ import random
 import pygame
 from pygame.locals import *
 
-size = (30, 40)
-bombs = 150
+from Player import Player
+
+size = (30, 30)
+bombs = 100
 
 class Minesweeper(object):
 
@@ -30,6 +32,8 @@ class Minesweeper(object):
         self.infoTextFont = pygame.font.SysFont('Arial', 40, 1)
         self.tileImage = pygame.image.load(os.path.join('Images', 'tileImage.png'))
         self.flagImage = pygame.image.load(os.path.join('Images', 'flagImage.png'))
+        self.cursor = pygame.image.load(os.path.join('Images', 'cursor.png'))
+        self.cursor = pygame.transform.scale(self.cursor, (15, 15))
         self.setupGame()
 
         while True:
@@ -41,9 +45,12 @@ class Minesweeper(object):
         self.clickedPosArray = np.zeros((self.size[1], self.size[0]), int)
         self.flaggedPosArray = np.zeros((self.size[1], self.size[0]), int)
 
+        self.player = Player(size)
+        self.cursorPos = (0, 0)
+
     
     def update(self):
-        self.clock.tick(10)
+        self.clock.tick(30)
         won = False
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -51,6 +58,7 @@ class Minesweeper(object):
                 sys.exit()
             elif event.type == MOUSEBUTTONUP:
                 self.mouseClicked(event.pos, event.button)
+                self.player.get_choice(self.createPlayerBoard())
 
         self.canvas.fill((255, 255, 255))
 
@@ -99,6 +107,7 @@ class Minesweeper(object):
         if totalUnclicked == self.totalBombs:
             won = True
 
+        innerRect.blit(self.cursor, (self.cursorPos[0]*15 + 5, self.cursorPos[1]*15 + 5))
         self.canvas.blit(innerRect, (75, 75))
 
         timerText = self.infoTextFont.render(createTime(self.frame // 10), False, (240, 0, 0))
@@ -156,6 +165,7 @@ class Minesweeper(object):
         if x >= 0 and x < self.size[0]*15:
             if y >= 0 and y < self.size[1]*15:
                 gridPos = (x // 15, y // 15)
+                self.cursorPos = gridPos
                 if self.clickedPosArray[gridPos[1]][gridPos[0]] == 0:
                     if button == 1:
                         self.revealSquare(gridPos)
@@ -186,6 +196,15 @@ class Minesweeper(object):
                 pygame.display.update()
                 time.sleep(2)
                 self.setupGame()
+
+
+    def createPlayerBoard(self):
+        player_board = np.copy(self.board)
+        for y in range(len(player_board)):
+            for x in range(len(player_board[0])):
+                if self.clickedPosArray[y][x] == 0: player_board[y][x] = -1
+
+        return player_board
 
 def createTime(seconds):
     return str(seconds // 60) + ':' + str(seconds % 60).zfill(2)
